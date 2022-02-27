@@ -28,13 +28,15 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MouseInputListener;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.w3c.dom.events.MouseEvent;
 
-public class clienteFTPBasico extends JFrame 
+public class clienteFTPBasico extends JFrame implements MouseInputListener
 {
 	private static final long serialVersionUID = 1L;
 	// Campos de la cabecera parte superior
@@ -100,6 +102,7 @@ public class clienteFTPBasico extends JFrame
 		listaDirec.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		//barra de desplazamiento para la lista
 		JScrollPane barraDesplazamiento = new JScrollPane(listaDirec);
+		listaDirec.addMouseListener(this);
 		barraDesplazamiento.setPreferredSize(new Dimension(335,420));
 		barraDesplazamiento.setBounds(new Rectangle(5,65,335,420));
 		c.add(barraDesplazamiento);
@@ -211,7 +214,15 @@ public class clienteFTPBasico extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				String nombreCarpeta = JOptionPane.showInputDialog(null,"Introduce el nombre del directorio a eliminar","carpeta");
+				//pide confirmación
+				int seleccion = JOptionPane.showConfirmDialog(null, "¿Desea eliminar el directorio seleccionado?");
+				if (seleccion == JOptionPane.OK_OPTION) {
+				//String nombreCarpeta = JOptionPane.showInputDialog(null,"Introduce el nombre del directorio a eliminar");
+				//if(!listaDirec.getSelectedValue().toString().equals("DIR")) {
+					//JOptionPane.showMessageDialog(null, "no es un directorio");
+				//}
+				String[] carpetaSplitted =listaDirec.getSelectedValue().toString().split(" ");
+				String nombreCarpeta = carpetaSplitted[1];
 				if (!(nombreCarpeta==null)) 
 				{
 					String directorio = direcSelec;
@@ -243,7 +254,7 @@ public class clienteFTPBasico extends JFrame
 					}
 				} 
 				// final del if
-			}
+			}}
 		}); 
 		//final del botón Eliminar Carpeta
 		botonCargar.addActionListener(new ActionListener()
@@ -293,6 +304,20 @@ public class clienteFTPBasico extends JFrame
 				}
 			}
 		}); // Fin botón descargar
+		botonDownloadDefault.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				String directorio = direcSelec;
+				if (!direcSelec.equals("/"))
+					directorio = directorio + "/";
+				if (!direcSelec.equals("")) 
+				{
+					//DescargarFichero(directorio + ficheroSelec, ficheroSelec);
+				}
+			}
+		});//fin default download directory
 		botonBorrar.addActionListener(new ActionListener() 
 		{
 			@Override
@@ -317,7 +342,7 @@ public class clienteFTPBasico extends JFrame
 		modeloLista = new DefaultListModel<String>();
 		//se definen propiedades para la lista, color y tipo de fuente
 
-		listaDirec.setForeground(Color.blue);
+		listaDirec.setForeground(Color.black);
 		Font fuente = new Font("Courier", Font.PLAIN, 12);
 		listaDirec.setFont(fuente);
 		//se eliminan los elementos de la lista
@@ -446,4 +471,74 @@ public class clienteFTPBasico extends JFrame
 			}
 		}
 	}// Final de BorrarFichero
+
+	@Override
+	public void mouseClicked(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getClickCount() == 2 && !e.isConsumed()) {
+		     e.consume();
+		     //handle double click event.
+		     String[] direccionSplitted = listaDirec.getSelectedValue().toString().split(" ");
+		     
+		     String direccion=direccionSplitted[1];
+		     try {
+		    	 direcSelec=direcSelec+"/"+direccion;
+		    	 System.out.println(direcSelec);
+				cliente.changeWorkingDirectory(direcSelec);
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+				FTPFile[] ff2 = null;
+				//obtener ficheros del directorio actual
+				try {
+					ff2 = cliente.listFiles();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//llenar la lista
+				llenarLista(ff2, direcSelec);
+		     System.out.println(direccion);
+		     llenarLista(null, direccion);
+		     
+		}
+	}
+
+	@Override
+	public void mousePressed(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseDragged(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseMoved(java.awt.event.MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }// Final de la clase ClienteFTPBasico
