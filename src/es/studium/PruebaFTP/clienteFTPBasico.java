@@ -55,6 +55,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 	JButton botonRename = new JButton("Renombrar fichero");
 	JButton botonRenameDir = new JButton("Renombrar carpeta");
 	JButton botonDownloadDefault = new JButton("Ruta descargas");
+	JButton botonRaiz = new JButton("Home directory");
 	JButton botonSalir = new JButton("Salir");
 	// Lista para los datos del directorio
 	static JList<String> listaDirec = new JList<String>();
@@ -124,6 +125,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 		c.add(botonBorrar);
 		botonBorrar.setBackground(Color.RED);
 		botonBorrar.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		c.add(botonRaiz);
 		c.add(botonSalir);
 		c.setLayout(null);
 		//se añaden el resto de los campos de pantalla
@@ -332,6 +334,61 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 				}
 			}
 		});
+		botonRaiz.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				try {
+			    	 direcSelec="/";
+			    	 System.out.println(direcSelec);
+					cliente.changeWorkingDirectory(direcSelec);
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+					FTPFile[] ff2 = null;
+					//obtener ficheros del directorio actual
+					try {
+						ff2 = cliente.listFiles();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					//llenar la lista
+					llenarLista(ff2, direcSelec);
+			}
+		});
+		botonRename.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				String nombreCarpeta = JOptionPane.showInputDialog(null, "Introduce el nombre del directorio","carpeta");
+				
+			}
+		});
+		botonRenameDir.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				String[] carpetaSplitted =listaDirec.getSelectedValue().toString().split(" ");
+				String nombreCarpeta = carpetaSplitted[1];
+				 String nuevoNombreCarpeta = JOptionPane.showInputDialog(null, "Introduce el nombre del directorio",nombreCarpeta);
+				try {
+					cliente.rename(nombreCarpeta, nuevoNombreCarpeta);
+					FTPFile[] ff2 = null;
+					//obtener ficheros del directorio actual
+					ff2 = cliente.listFiles();
+					//llenar la lista con los ficheros del directorio actual
+					llenarLista(ff2,direcSelec);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 	} // fin constructor
 	private static void llenarLista(FTPFile[] files,String direc2) 
 	{
@@ -357,6 +414,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 			e.printStackTrace();
 		}
 		direcSelec = direc2; //directorio actual
+		
 		//se añade el directorio de trabajo al listmodel, primerelementomodeloLista.addElement(direc2);
 		//se recorre el array con los ficheros y directorios
 		for (int i = 0; i < files.length; i++) 
@@ -500,7 +558,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 				//llenar la lista
 				llenarLista(ff2, direcSelec);
 		     System.out.println(direccion);
-		     llenarLista(null, direccion);
+		     //llenarLista(null, direccion);
 		     
 		}
 	}
