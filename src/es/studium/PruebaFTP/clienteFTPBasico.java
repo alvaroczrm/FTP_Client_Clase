@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -29,6 +31,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputListener;
+import javax.swing.text.AttributeSet.ColorAttribute;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -133,6 +136,8 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 		setLayout(new FlowLayout());
 		
 		setSize(385,640);
+		setResizable(false);
+		c.setBackground(Color.LIGHT_GRAY);
 		setVisible(true);
 		//Acciones al pulsar en la lista o en los botones
 		listaDirec.addListSelectionListener(new ListSelectionListener()
@@ -216,6 +221,12 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
+				/**
+				 * String isFile =listaDirec.getSelectedValue().toString();
+				 * Path file = new File(direcSelec+isFile).toPath();
+				if(Files.isRegularFile(file)) {
+					System.out.println("es un archivo");}
+				 */
 				//pide confirmación
 				int seleccion = JOptionPane.showConfirmDialog(null, "¿Desea eliminar el directorio seleccionado?");
 				if (seleccion == JOptionPane.OK_OPTION) {
@@ -364,8 +375,20 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				String nombreCarpeta = JOptionPane.showInputDialog(null, "Introduce el nombre del directorio","carpeta");
 				
+				String nombreFile = listaDirec.getSelectedValue().toString();
+				String nuevoNombreFile = JOptionPane.showInputDialog(null, "Introduce el nombre del archivo",nombreFile);
+				try {
+					cliente.rename(nombreFile, nuevoNombreFile);
+					FTPFile[] ff2 = null;
+					//obtener ficheros del directorio actual
+					ff2 = cliente.listFiles();
+					//llenar la lista con los ficheros del directorio actual
+					llenarLista(ff2,direcSelec);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		botonRenameDir.addActionListener(new ActionListener() 
