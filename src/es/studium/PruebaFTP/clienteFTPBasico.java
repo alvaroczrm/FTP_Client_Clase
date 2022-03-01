@@ -42,6 +42,8 @@ import org.w3c.dom.events.MouseEvent;
 public class clienteFTPBasico extends JFrame implements MouseInputListener
 {
 	private static final long serialVersionUID = 1L;
+	String carpetaDestino = "";
+	File fileDescargas;
 	// Campos de la cabecera parte superior
 	static JTextField txtServidor = new JTextField();
 	static JTextField txtUsuario = new JTextField();
@@ -58,7 +60,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 	JButton botonRename = new JButton("Renombrar fichero");
 	JButton botonRenameDir = new JButton("Renombrar carpeta");
 	JButton botonDownloadDefault = new JButton("Ruta descargas");
-	JButton botonRaiz = new JButton("Home directory");
+	JButton botonRaiz = new JButton("Directorio raiz");
 	JButton botonSalir = new JButton("Salir");
 	// Lista para los datos del directorio
 	static JList<String> listaDirec = new JList<String>();
@@ -81,7 +83,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 
 	public clienteFTPBasico() throws IOException
 	{
-		super("CLIENTE BÁSICO FTP");
+		super("CLIENTE FTP");
 		//para ver los comandos que se originan
 		cliente.addProtocolCommandListener(new PrintCommandListener(new PrintWriter (System.out)));
 		cliente.connect(servidor); //conexión al servidor
@@ -155,7 +157,7 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 					fic =listaDirec.getSelectedValue().toString();
 					//Se trata de un fichero
 					ficheroSelec = direcSelec;
-					txtArbolDirectoriosConstruido.setText("FICHERO SELECCIONADO: " + ficheroSelec);
+					txtArbolDirectoriosConstruido.setText("FICHERO SELECCIONADO: " + listaDirec.getSelectedValue().toString());
 					ficheroSelec = fic;//nos quedamos con el nocmbre
 					txtActualizarArbol.setText("DIRECTORIO ACTUAL: " + direcSelec);
 				}
@@ -322,13 +324,29 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				String directorio = direcSelec;
-				if (!direcSelec.equals("/"))
-					directorio = directorio + "/";
-				if (!direcSelec.equals("")) 
+				
+				String archivoyCarpetaDestino = "";
+				//String carpetaDestino = "";
+				JFileChooser f = new JFileChooser();
+				//solo se pueden seleccionar directorios
+				f.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				//título de la ventana
+				f.setDialogTitle("Selecciona el Directorio por defecto para descargas");
+				int returnVal = f.showDialog(null, "Definir");
+				if (returnVal == JFileChooser.APPROVE_OPTION) 
 				{
-					//DescargarFichero(directorio + ficheroSelec, ficheroSelec);
+					fileDescargas = f.getSelectedFile();
+					//obtener carpeta de destino
+					
+					carpetaDestino = (fileDescargas.getAbsolutePath()).toString();
+					
 				}
+				/*
+				String rutaObtenida=carpetaDestino;
+				String rutaUsuario = JOptionPane.showInputDialog(null, "Introduce el nombre del directorio",carpetaDestino);
+				carpetaDestino=rutaUsuario;
+			*/
+				
 			}
 		});//fin default download directory
 		botonBorrar.addActionListener(new ActionListener() 
@@ -492,20 +510,28 @@ public class clienteFTPBasico extends JFrame implements MouseInputListener
 	{
 		File file;
 		String archivoyCarpetaDestino = "";
-		String carpetaDestino = "";
+		//String carpetaDestino = "";
 		JFileChooser f = new JFileChooser();
 		//solo se pueden seleccionar directorios
 		f.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		//título de la ventana
 		f.setDialogTitle("Selecciona el Directorio donde Descargar el Fichero");
+		f.setCurrentDirectory(fileDescargas);
 		int returnVal = f.showDialog(null, "Descargar");
 		if (returnVal == JFileChooser.APPROVE_OPTION) 
 		{
 			file = f.getSelectedFile();
+			System.out.println(file);
 			//obtener carpeta de destino
+			if(carpetaDestino=="") {
 			carpetaDestino = (file.getAbsolutePath()).toString();
+			System.out.println(carpetaDestino);
 			//construimos el nombre completo que se creará en nuestro disco
-			archivoyCarpetaDestino = carpetaDestino + File.separator + nombreFichero;
+			archivoyCarpetaDestino = carpetaDestino + File.separator + nombreFichero;}
+			System.out.println();
+			if(!(carpetaDestino=="")) {
+				archivoyCarpetaDestino = carpetaDestino + File.separator + nombreFichero;
+			}
 			try 
 			{
 				cliente.setFileType(FTP.BINARY_FILE_TYPE);
